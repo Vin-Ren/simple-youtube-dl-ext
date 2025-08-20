@@ -76,16 +76,31 @@ jobs:
     name: Create GitHub Release
     runs-on: ubuntu-22.04
     needs: [build_server, build_extensions]
+    permissions:
+      contents: write
 
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
         with:
           path: release-assets
 
-      - name: Publish Release
+      - name: Rename and organize assets
+        run: |
+          mkdir -p final-assets
+
+          # Rename server binaries
+          mv release-assets/server-windows/server.exe final-assets/server-windows.exe
+          mv release-assets/server-linux/server final-assets/server-linux
+          mv release-assets/server-macos/server final-assets/server-macos
+
+          # Rename extension zips
+          mv release-assets/chrome-extension/chrome-extension.zip final-assets/extension-chrome.zip
+          mv release-assets/firefox-extension/firefox-extension.zip final-assets/extension-firefox.zip
+
+          ls -lh final-assets
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/**/*
-          draft: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: final-assets/*
