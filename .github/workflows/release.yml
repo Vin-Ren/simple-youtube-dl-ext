@@ -1,45 +1,32 @@
-# This is the name of the GitHub Actions workflow.
 name: Create Release and Build Binaries
 
-# This workflow runs automatically whenever you push a new tag that starts with 'v' (e.g., v1.0, v1.1.0).
 on:
   push:
     tags:
       - 'v*'
 
 jobs:
-  # --- JOB 1: Build the Python server executables for Windows, macOS, and Linux ---
   build_server:
     name: Build Server Executable
-    # Use a matrix strategy to run this job on all three major operating systems.
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-    
+        os: [windows-2022, ubuntu-22.04, macos-14] # pinned versions
     runs-on: ${{ matrix.os }}
 
     steps:
-      # Step 1: Check out the repository code.
-      - name: Check out repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      # Step 2: Set up the correct version of Python.
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # Step 3: Install the Python dependencies from your requirements file.
-      - name: Install Python dependencies
-        run: |
+      - run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      # Step 4: Download and prepare FFmpeg for each specific OS.
       - name: Download and set up FFmpeg (Windows)
         if: runner.os == 'Windows'
         run: |
-          # Download the essentials build and extract ffmpeg.exe to the project root.
           curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip -o ffmpeg.zip
           7z x ffmpeg.zip -offmpeg
           copy ffmpeg\*\bin\ffmpeg.exe ffmpeg.exe
@@ -53,7 +40,6 @@ jobs:
         if: runner.os == 'macOS'
         run: brew install ffmpeg
 
-      # Step 5: Run PyInstaller to create the single-file executable.
       - name: Build with PyInstaller (Windows)
         if: runner.os == 'Windows'
         run: pyinstaller --onefile --add-binary "ffmpeg.exe;." backend/server.py
@@ -61,118 +47,41 @@ jobs:
       - name: Build with PyInstaller (Linux/macOS)
         if: runner.os == 'Linux' || runner.os == 'macOS'
         run: pyinstaller --onefile --add-binary "$(which ffmpeg):." backend/server.py
-        
-      # Step 6: Upload the final executable as a build artifact.
-      - name: Upload Server Executable
-        uses: actions/upload-artifact@v3
+
+      - uses: actions/upload-artifact@v4
         with:
           name: server-${{ runner.os }}
           path: dist/server*
 
-  # --- JOB 2: Build the Chrome and Firefox extension zip files ---
   build_extensions:
     name: Build Browser Extensions
-    runs-on: ubuntu-latest # This job can run on any OS.
+    runs-on: ubuntu-22.04
     
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-        
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
-      # Run the build.py script you created earlier.
-      - name: Run extension build script
-        run: python build_extensions.py
-        
-      # Upload the resulting zip files as artifacts.
-      - name: Upload Extension Archives
-        uses: actions/upload-artifact@v3
+      - run: python build.py
+      - uses: actions/upload-artifact@v4
         with:
           name: extensions
           path: build/*.zip
 
-  # --- JOB 3: Create the GitHub Release and upload all the files ---
   create_release:
     name: Create GitHub Release
-    runs-on: ubuntu-latest
-    # This job will only run after the server and extension builds are successful.
+    runs-on: ubuntu-22.04
     needs: [build_server, build_extensions]
 
     steps:
-      # Step 1: Create a draft release on GitHub.
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v4
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: true # Creates a draft release. Change to false to publish automatically.
-          prerelease: false
+          path: release-assets
 
-      # Step 2: Download all the artifacts from the previous build jobs.
-      - name: Download Server Artifacts
-        uses: actions/download-artifact@v3
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
         with:
-          path: release-assets/servers
-
-      - name: Download Extension Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: extensions
-          path: release-assets/extensions
-
-      # Step 3: Upload each file to the GitHub release.
-      - name: Upload Release Assets
-        uses: actions/upload-release-asset@v1
+          files: release-assets/**/*
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-assets/servers/server-windows-latest/server.exe
-          asset_name: server-windows.exe
-          asset_content_type: application/octet-stream
-
-      - name: Upload Release Assets (Linux)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-assets/servers/server-ubuntu-latest/server
-          asset_name: server-linux
-          asset_content_type: application/octet-stream
-
-      - name: Upload Release Assets (macOS)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-assets/servers/server-macos-latest/server
-          asset_name: server-macos
-          asset_content_type: application/octet-stream
-          
-      - name: Upload Release Assets (Extensions)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-assets/extensions/chrome_extension.zip
-          asset_name: chrome_extension.zip
-          asset_content_type: application/zip
-          
-      - name: Upload Release Assets (Extensions)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-assets/extensions/firefox_extension.zip
-          asset_name: firefox_extension.zip
-          asset_content_type: application/zip
