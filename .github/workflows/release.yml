@@ -85,20 +85,15 @@ jobs:
         with:
           path: release-assets
 
-      - name: Rename and organize assets
+      - name: Prepare final assets
         run: |
           mkdir -p final-assets
+          mv release-assets/server-Windows/server.exe final-assets/server-windows.exe
+          mv release-assets/server-Linux/server final-assets/server-linux
+          mv release-assets/server-macOS/server final-assets/server-mac
+          mv release-assets/extension-Chrome/extension.zip final-assets/extension-chrome.zip
+          mv release-assets/extension-Firefox/extension.zip final-assets/extension-firefox.zip
 
-          # Rename server binaries
-          mv release-assets/server-windows/server.exe final-assets/server-windows.exe
-          mv release-assets/server-linux/server final-assets/server-linux
-          mv release-assets/server-macos/server final-assets/server-macos
-
-          # Rename extension zips
-          mv release-assets/chrome-extension/chrome-extension.zip final-assets/extension-chrome.zip
-          mv release-assets/firefox-extension/firefox-extension.zip final-assets/extension-firefox.zip
-
-          ls -lh final-assets
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
