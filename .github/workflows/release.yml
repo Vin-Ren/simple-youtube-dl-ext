@@ -91,9 +91,8 @@ jobs:
           mv release-assets/server-Windows/server.exe final-assets/server-windows.exe
           mv release-assets/server-Linux/server final-assets/server-linux
           mv release-assets/server-macOS/server final-assets/server-mac
-          mv release-assets/extension-Chrome/extension.zip final-assets/extension-chrome.zip
-          mv release-assets/extension-Firefox/extension.zip final-assets/extension-firefox.zip
-
+          mv release-assets/extensions/chrome_extension.zip final-assets/extension-chrome.zip
+          mv release-assets/extensions/firefox_extension.zip final-assets/extension-firefox.zip
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
