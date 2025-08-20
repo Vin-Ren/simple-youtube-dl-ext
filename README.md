@@ -28,3 +28,4 @@ To build server for windows, run:
 
 ## License
 MIT
+~ Vibecoded
