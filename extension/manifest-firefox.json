@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Simple YT Downloader",
+  "version": "16.0",
+  "description": "Download YouTube videos with a persistent local backend.",
+  "icons": { "128": "icon.png" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png",
+    "default_title": "Download Video"
+  },
+  "permissions": [ "storage", "alarms", "activeTab" ],
+  "host_permissions": [ "http://127.0.0.1:8765/*" ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "yt-downloader@example.com"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+body { width: 360px; }
+.card-body { max-height: 580px; overflow-y: auto; }
+/* This class is added by JS to the selected button */
+.format-option.btn-primary { 
+    /* DaisyUI's primary button style for the selected item */
+}
+#formats-list::-webkit-scrollbar { width: 6px; }
+#formats-list::-webkit-scrollbar-track { background: #f1f5f9; }
+#formats-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.download-section { min-height: 60px; }

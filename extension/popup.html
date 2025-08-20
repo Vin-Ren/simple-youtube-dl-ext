@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <!-- Local CSS to comply with Content Security Policy -->
+  <link rel="stylesheet" href="deps/daisyui.min.css">
+  <link rel="stylesheet" href="popup.css">
+  <script src="deps/tailwind.min.js"></script>
+</head>
+<body>
+  <div class="card bg-base-100 shadow-xl rounded-lg">
+    <div class="card-body p-4">
+      <!-- Header -->
+      <div class="flex items-center gap-3 mb-3 border-b border-base-200 pb-3">
+        <img src="icon.png" class="w-6 h-6" alt="icon">
+        <h2 class="card-title text-md font-bold">YouTube Downloader</h2>
+      </div>
+
+      <!-- Loading / Error View -->
+      <div id="status-view" class="text-center p-6">
+        <span id="spinner" class="loading loading-spinner loading-lg"></span>
+        <p id="status-text" class="text-sm text-base-content/70 mt-2">Loading video data...</p>
+      </div>
+      
+      <!-- Success View -->
+      <div id="success-view" class="hidden text-center p-4 space-y-3">
+        <div class="text-success">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </div>
+        <h3 class="font-bold text-lg">Download Complete!</h3>
+        <p class="text-xs text-base-content/70">File saved to:</p>
+        <p id="filepath-text" class="text-xs bg-base-200 p-2 rounded-md break-all"></p>
+        <button id="close-btn" class="btn btn-sm btn-ghost mt-2">Return</button>
+      </div>
+
+      <!-- Main Content View -->
+      <div id="main-view" class="hidden space-y-4">
+        <div class="flex gap-4">
+          <img id="thumbnail" src="" class="w-28 h-auto object-cover rounded-md flex-shrink-0" alt="Video Thumbnail"/>
+          <div class="flex flex-col justify-center min-w-0">
+            <p class="font-semibold text-sm leading-tight" id="video-title"></p>
+            <p class="text-xs text-base-content/70 mt-1" id="video-duration"></p>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="font-semibold text-sm mb-2">Available formats:</h3>
+          <div id="formats-list" class="space-y-2 max-h-40 overflow-y-auto pr-2 border-t border-base-200 pt-2"></div>
+        </div>
+
+        <div class="download-section border-t border-base-200 pt-3">
+          <div id="progress-container" class="space-y-2 hidden">
+            <progress id="progress-bar" class="progress w-full" value="0" max="100"></progress>
+            <p id="progress-text" class="text-center text-xs font-medium"></p>
+          </div>
+          <button id="download-btn" class="btn btn-primary w-full mt-2">Download</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
