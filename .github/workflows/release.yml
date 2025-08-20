@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write   # 👈 allow creating releases
+
 jobs:
   build_server:
     name: Build Server Executable
