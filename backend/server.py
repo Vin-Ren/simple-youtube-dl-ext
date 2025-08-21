@@ -243,8 +243,10 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--download-directory", dest="download_dir", default=get_default_download_path(), help="Override the download path, default='%s'" % get_default_download_path())
     args = parser.parse_args()
     if args.bgutil_base_url:
+        print("[Config] Running with bgutil pot provider base url: %s" % args.bgutil_base_url)
         BGUTIL_BASE_URL = args.bgutil_base_url
     if args.download_dir:
+        print("[Config] Running with base download path: %s" % args.download_dir)
         DOWNLOAD_PATH=args.download_dir
     
     with socketserver.TCPServer((HOST, PORT), RequestHandler) as httpd:
